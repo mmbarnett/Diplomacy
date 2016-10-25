@@ -8,6 +8,7 @@ class Player(object):
 	def __init__(self, cntry):
 		self.name = cntry # a string
 		self.supplies = 0
+		self.units = []
 
 class Province(object):
 	"""one province on the map"""
@@ -34,7 +35,7 @@ class Province(object):
 			return False
 
 		for p in self.adjacents:
-			if not p.is_land():
+			if not p.is_land:
 				return True
 		return False
 
@@ -150,6 +151,45 @@ class Board_Map(object):
 		for p in self.provinces:
 			p.set_adjacents(self.provinces)
 
+	def update(self):
+		""" right now just adds units where necessary """
+		
+		for p in self.provinces:
+			if p.is_supply and p.country != None:
+				if p.is_coastal():
+					response = ""
+					while not response in ['army', 'fleet']:
+						response = raw_input(p.country.name.upper() + ", would you like an army or a fleet for " + p.name + "?\n")
+
+					if response == 'army':
+						p.country.units.append(Army(p, p.country))
+					elif response == 'fleet':
+						p.country.units.append(Fleet(p, p.country))
+					else:
+						raise Exception('00. Neither army nor fleet')
+				else: # not coastal
+					p.country.units.append(Army(p, p.country))
+
+class Unit(object):
+	""" Super-class which encompasses armies and
+	fleets """
+
+	def __init__(self, loc, owner):
+		self.province = loc
+		self.country = owner
+
+class Army(Unit):
+	""" An army can only move on land """
+
+	def __init__(self, loc, owner):
+		Unit.__init__(self, loc, owner)
+
+class Fleet(Unit):
+	""" A fleet can only move in water and on
+	coastal territories """
+
+	def __init__(self, loc, owner):
+		Unit.__init__(self, loc, owner)
 
 def main():
 	global COUNTRIES
@@ -162,13 +202,7 @@ def main():
 	# initialize board
 	board = Board_Map(players)
 
-	# test bijection
-	for p in board.provinces:
-		for q in board.provinces:
-			if not ((p in q.adjacents and q in p.adjacents) or
-			(not p in q.adjacents and not q in p.adjacents)):
-				print (p.name, q.name)
-
+	board.update()
 
 
 if __name__ == "__main__":
