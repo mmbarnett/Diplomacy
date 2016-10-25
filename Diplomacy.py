@@ -178,11 +178,23 @@ class Unit(object):
 		self.province = loc
 		self.country = owner
 
+	def is_legal_move(self, dest):
+		if dest in self.province.adjacents:
+			return True
+		else:
+			return False
+
 class Army(Unit):
 	""" An army can only move on land """
 
 	def __init__(self, loc, owner):
 		Unit.__init__(self, loc, owner)
+
+	def is_legal_move(self, dest):
+		if dest in self.province.adjacents and dest.is_land:
+			return True
+		else:
+			return False
 
 class Fleet(Unit):
 	""" A fleet can only move in water and on
@@ -190,6 +202,34 @@ class Fleet(Unit):
 
 	def __init__(self, loc, owner):
 		Unit.__init__(self, loc, owner)
+		self.last_loc = None
+
+	def is_legal_move(self, dest):
+		if not dest.is_land or not self.province.is_land:
+			return True
+		elif not dest.is_coast():
+			return False
+		else:
+			# then moving from coast to coast
+			# need to share at least one adjacent sea province
+
+			# first do weird cases
+			if self.province.abbv = 'stp':
+				if self.last_loc = None or self.last_loc.abbv = 'bot':
+					if dest.abbv in ['fin','lvn']:
+						return True
+					else:
+						return False
+				else: # north coast
+					if dest.abbv == 'nwy':
+						return True
+					else:
+						return False
+
+			for p in self.province.adjacents:
+				if p in dest.adjacents:
+					return True
+			return False
 
 def main():
 	global COUNTRIES
